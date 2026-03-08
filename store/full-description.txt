@@ -1,0 +1,33 @@
+GRIDLOCK — Block Puzzle Game
+
+Drop blocks. Clear lines. Chase the high score.
+
+GRIDLOCK is a beautifully designed block puzzle game that's easy to learn but impossible to put down. Place colorful pieces on the board, clear full rows and columns, and keep the grid clean as long as you can.
+
+★ CLASSIC MODE
+Play endlessly. No time limit, no pressure — just pure puzzle satisfaction. Place pieces, clear lines, build combos, and beat your personal best. A perfect game for a few minutes or a few hours.
+
+★ ADVENTURE MODE
+50 hand-crafted levels with unique objectives:
+• Clear a set number of lines
+• Reach a target score
+• Pull off combo chains
+Each level adds obstacles and new challenges. Earn up to 3 stars per level!
+
+★ FEATURES
+• Smooth drag-and-drop controls
+• Combo system — chain clears for massive bonus points
+• Beautiful warm color palette, easy on the eyes
+• Works offline, no internet required
+• No ads during gameplay
+• Satisfying haptic feedback
+
+★ HOW TO PLAY
+1. Drag a piece from the tray onto the board
+2. Fill a complete row or column to clear it
+3. Clearing multiple lines at once scores a COMBO bonus
+4. Game ends when no pieces can be placed
+
+Simple rules. Deep strategy. One more game... always.
+
+Download GRIDLOCK and find your flow.
