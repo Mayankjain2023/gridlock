@@ -1,13 +1,17 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
   Modal,
-  Animated,
 } from 'react-native';
 import { COLORS } from '../game/constants';
+import { RewardedAd, RewardedAdEventType, TestIds } from 'react-native-google-mobile-ads';
+
+const AD_UNIT_ID = __DEV__
+  ? TestIds.REWARDED
+  : 'ca-app-pub-8002961623139540/4703118875';
 
 type OverlayButton = {
   label: string;
@@ -20,14 +24,51 @@ type Props = {
   title: string;
   score: number;
   best?: string;
-  stars?: number; // 1-3, undefined = no stars
+  stars?: number;
   isNewRecord?: boolean;
   buttons: OverlayButton[];
+  onAdReward?: () => void; // called when user earns reward
 };
 
 export default function GameOverlay({
-  visible, title, score, best, stars, isNewRecord, buttons,
+  visible, title, score, best, stars, isNewRecord, buttons, onAdReward,
 }: Props) {
+  const [adLoaded, setAdLoaded] = useState(false);
+  const [adLoading, setAdLoading] = useState(false);
+  const [rewarded, setRewarded] = useState<RewardedAd | null>(null);
+
+  useEffect(() => {
+    if (!visible) return;
+
+    const ad = RewardedAd.createForAdRequest(AD_UNIT_ID, {
+      requestNonPersonalizedAdsOnly: true,
+    });
+
+    const unsubLoaded = ad.addAdEventListener(RewardedAdEventType.LOADED, () => {
+      setAdLoaded(true);
+      setAdLoading(false);
+    });
+    const unsubEarned = ad.addAdEventListener(RewardedAdEventType.EARNED_REWARD, () => {
+      onAdReward?.();
+    });
+
+    setAdLoading(true);
+    setAdLoaded(false);
+    ad.load();
+    setRewarded(ad);
+
+    return () => {
+      unsubLoaded();
+      unsubEarned();
+    };
+  }, [visible]);
+
+  const handleWatchAd = () => {
+    if (rewarded && adLoaded) {
+      rewarded.show();
+    }
+  };
+
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.backdrop}>
@@ -62,9 +103,16 @@ export default function GameOverlay({
             ))}
           </View>
 
-          <View style={styles.adPlaceholder}>
-            <Text style={styles.adText}>[ AD PLACEMENT — REWARDED ]</Text>
-          </View>
+          <TouchableOpacity
+            style={[styles.adBtn, !adLoaded && styles.adBtnDisabled]}
+            onPress={handleWatchAd}
+            disabled={!adLoaded}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.adBtnText}>
+              {adLoading ? 'Loading ad...' : adLoaded ? '▶ Watch Ad' : 'No ad available'}
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
     </Modal>
@@ -140,36 +188,30 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
-  btn_gold: {
-    backgroundColor: '#f5a623',
-  },
-  btn_pink: {
-    backgroundColor: '#e84393',
-  },
-  btn_teal: {
-    backgroundColor: '#00b894',
-  },
+  btn_gold: { backgroundColor: '#f5a623' },
+  btn_pink: { backgroundColor: '#e84393' },
+  btn_teal: { backgroundColor: '#00b894' },
   btnText: {
     fontFamily: 'LilitaOne',
     fontSize: 16,
     color: '#fff',
     letterSpacing: 1,
   },
-  adPlaceholder: {
-    marginTop: 24,
-    width: 260,
-    height: 46,
-    borderWidth: 1.5,
-    borderColor: 'rgba(0,0,0,0.08)',
-    borderStyle: 'dashed',
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+  adBtn: {
+    marginTop: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 28,
+    borderRadius: 12,
+    backgroundColor: '#4a90d9',
+    elevation: 3,
   },
-  adText: {
-    fontFamily: 'Baloo2_500Medium',
-    fontSize: 9,
-    color: COLORS.text2,
-    letterSpacing: 2,
+  adBtnDisabled: {
+    backgroundColor: 'rgba(0,0,0,0.08)',
+  },
+  adBtnText: {
+    fontFamily: 'Baloo2_700Bold',
+    fontSize: 13,
+    color: '#fff',
+    letterSpacing: 1,
   },
 });
