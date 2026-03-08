@@ -222,8 +222,11 @@ export default function GameScreen({ mode, adventureLevel = 1, onHome, onNextLev
       clearGhost();
       setSelectedPiece(null);
       doPlace(selectedPiece, row, col, piece);
+    } else {
+      updateGhost(selectedPiece, row, col, grid);
+      setTimeout(clearGhost, 400);
     }
-  }, [selectedPiece, pieces, grid]);
+  }, [selectedPiece, pieces, grid, updateGhost]);
 
   const handlePieceSelect = (idx: number) => {
     if (selectedPiece === idx) {
@@ -473,6 +476,7 @@ export default function GameScreen({ mode, adventureLevel = 1, onHome, onNextLev
             cellSize={CELL_SIZE}
             ghostCells={ghostCells}
             clearingCells={clearingCells}
+            onCellTap={handleCellTap}
           />
         </View>
 

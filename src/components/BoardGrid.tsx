@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { GRID_SIZE, COLORS, CellValue } from '../game/constants';
 
 type Props = {
@@ -7,9 +7,10 @@ type Props = {
   cellSize: number;
   ghostCells?: Map<string, { ok: boolean; color?: string }>;
   clearingCells?: Set<number>;
+  onCellTap?: (row: number, col: number) => void;
 };
 
-export default function BoardGrid({ grid, cellSize, ghostCells, clearingCells }: Props) {
+export default function BoardGrid({ grid, cellSize, ghostCells, clearingCells, onCellTap }: Props) {
   const gap = 3;
   const radius = Math.max(4, cellSize * 0.18);
 
@@ -56,24 +57,30 @@ export default function BoardGrid({ grid, cellSize, ghostCells, clearingCells }:
               opacity = 0;
             }
 
-            return (
-              <View
+            const cellStyle = [
+              styles.cell,
+              {
+                width: cellSize,
+                height: cellSize,
+                borderRadius: radius,
+                backgroundColor: bg,
+                opacity,
+                borderColor,
+                borderWidth,
+              },
+              cell && !(cell as any).obs && styles.filledCell,
+              (cell as any)?.obs && styles.obstacleCell,
+            ];
+
+            return onCellTap ? (
+              <TouchableOpacity
                 key={c}
-                style={[
-                  styles.cell,
-                  {
-                    width: cellSize,
-                    height: cellSize,
-                    borderRadius: radius,
-                    backgroundColor: bg,
-                    opacity,
-                    borderColor,
-                    borderWidth,
-                  },
-                  cell && !(cell as any).obs && styles.filledCell,
-                  (cell as any)?.obs && styles.obstacleCell,
-                ]}
+                style={cellStyle}
+                onPress={() => onCellTap(r, c)}
+                activeOpacity={0.7}
               />
+            ) : (
+              <View key={c} style={cellStyle} />
             );
           })}
         </View>
