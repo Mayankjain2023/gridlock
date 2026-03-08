@@ -14,7 +14,7 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.yourstudio.gridlock",
+      "bundleIdentifier": "com.veltrixgames.gridlock",
       "buildNumber": "1"
     },
     "android": {
