@@ -36,12 +36,7 @@
     },
     "plugins": [
       "expo-font",
-      [
-        "react-native-google-mobile-ads",
-        {
-          "androidAppId": "ca-app-pub-8002961623139540~9864421579"
-        }
-      ]
+      "./withAdMob"
     ],
     "scheme": "gridlock",
     "extra": {
