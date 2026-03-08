@@ -1,4 +1,7 @@
 {
+  "react-native-google-mobile-ads": {
+    "android_app_id": "ca-app-pub-8002961623139540~9864421579"
+  },
   "expo": {
     "name": "GRIDLOCK",
     "slug": "gridlock-block-puzzle",
