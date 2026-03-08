@@ -5,11 +5,9 @@ import {
   StyleSheet,
   Dimensions,
   PanResponder,
-  Animated,
   Share,
-  Vibration,
-  SafeAreaView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { useKeepAwake } from 'expo-keep-awake';
 
@@ -55,6 +53,33 @@ type Props = {
   onNextLevel?: (levelId: number) => void;
 };
 
+const FLOAT_CELL = 32;
+const FLOAT_GAP = 3;
+
+function FloatingPiece({ piece, x, y }: { piece: Piece; x: number; y: number }) {
+  const maxR = Math.max(...piece.shape.map((c: [number, number]) => c[0])) + 1;
+  const maxC = Math.max(...piece.shape.map((c: [number, number]) => c[1])) + 1;
+  const set = new Set(piece.shape.map((c: [number, number]) => `${c[0]},${c[1]}`));
+  const w = maxC * FLOAT_CELL + (maxC - 1) * FLOAT_GAP;
+  const h = maxR * FLOAT_CELL + (maxR - 1) * FLOAT_GAP;
+  return (
+    <View pointerEvents="none" style={{ position: 'absolute', left: x - w / 2, top: y - h / 2, zIndex: 999, opacity: 0.92 }}>
+      {Array.from({ length: maxR }, (_, r) => (
+        <View key={r} style={{ flexDirection: 'row', gap: FLOAT_GAP }}>
+          {Array.from({ length: maxC }, (_, c) => (
+            <View key={c} style={{
+              width: FLOAT_CELL, height: FLOAT_CELL, borderRadius: 7,
+              backgroundColor: set.has(`${r},${c}`) ? piece.color.bg : 'transparent',
+              shadowColor: '#000', shadowOffset: { width: 0, height: 3 },
+              shadowOpacity: 0.2, shadowRadius: 4, elevation: 6,
+            }} />
+          ))}
+        </View>
+      ))}
+    </View>
+  );
+}
+
 export default function GameScreen({ mode, adventureLevel = 1, onHome, onNextLevel }: Props) {
   useKeepAwake();
 
@@ -78,7 +103,9 @@ export default function GameScreen({ mode, adventureLevel = 1, onHome, onNextLev
   const [clearingCells, setClearingCells] = useState<Set<number>>(new Set());
 
   // ── Drag ───────────────────────────────────────────────────────────────────
-  const dragAnim = useRef(new Animated.ValueXY()).current;
+  const [dragPos, setDragPos] = useState<{ x: number; y: number } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
   const dragRef = useRef<{
     pieceIdx: number;
     startX: number;
@@ -146,6 +173,8 @@ export default function GameScreen({ mode, adventureLevel = 1, onHome, onNextLev
   const clearGhost = () => setGhostCells(new Map());
 
   // ── PanResponder for drag ──────────────────────────────────────────────────
+  const LIFT = 90; // px above finger
+
   const panResponder = useCallback((pieceIdx: number) =>
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
@@ -158,11 +187,16 @@ export default function GameScreen({ mode, adventureLevel = 1, onHome, onNextLev
           boardLayout: boardLayout.current,
         };
         setSelectedPiece(pieceIdx);
+        setIsDragging(true);
+        setDragPos({ x: e.nativeEvent.pageX, y: e.nativeEvent.pageY - LIFT });
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       },
       onPanResponderMove: (e) => {
         if (!dragRef.current || !boardLayout.current) return;
         const px = e.nativeEvent.pageX;
-        const py = e.nativeEvent.pageY - 55; // offset above finger
+        const py = e.nativeEvent.pageY - LIFT;
+
+        setDragPos({ x: px, y: py });
 
         const bl = boardLayout.current;
         const step = CELL_SIZE + BOARD_GAP;
@@ -170,21 +204,24 @@ export default function GameScreen({ mode, adventureLevel = 1, onHome, onNextLev
         const row = Math.round((py - bl.y - CELL_SIZE / 2) / step);
 
         const piece = pieces[pieceIdx];
-        const maxR = Math.max(...piece.shape.map(c => c[0]));
-        const maxC = Math.max(...piece.shape.map(c => c[1]));
+        const maxR = Math.max(...piece.shape.map((c: [number, number]) => c[0]));
+        const maxC = Math.max(...piece.shape.map((c: [number, number]) => c[1]));
         const anchorR = Math.floor((maxR + 1) / 2);
         const anchorC = Math.floor((maxC + 1) / 2);
 
         updateGhost(pieceIdx, row - anchorR, col - anchorC, grid);
       },
       onPanResponderRelease: (e) => {
+        setIsDragging(false);
+        setDragPos(null);
+
         if (!dragRef.current || !boardLayout.current) {
           clearGhost();
           setSelectedPiece(null);
           return;
         }
         const px = e.nativeEvent.pageX;
-        const py = e.nativeEvent.pageY - 55;
+        const py = e.nativeEvent.pageY - LIFT;
 
         const bl = boardLayout.current;
         const step = CELL_SIZE + BOARD_GAP;
@@ -192,8 +229,8 @@ export default function GameScreen({ mode, adventureLevel = 1, onHome, onNextLev
         const row = Math.round((py - bl.y - CELL_SIZE / 2) / step);
 
         const piece = pieces[pieceIdx];
-        const maxR = Math.max(...piece.shape.map(c => c[0]));
-        const maxC = Math.max(...piece.shape.map(c => c[1]));
+        const maxR = Math.max(...piece.shape.map((c: [number, number]) => c[0]));
+        const maxC = Math.max(...piece.shape.map((c: [number, number]) => c[1]));
         const anchorR = Math.floor((maxR + 1) / 2);
         const anchorC = Math.floor((maxC + 1) / 2);
 
@@ -208,6 +245,8 @@ export default function GameScreen({ mode, adventureLevel = 1, onHome, onNextLev
         }
       },
       onPanResponderTerminate: () => {
+        setIsDragging(false);
+        setDragPos(null);
         clearGhost();
         setSelectedPiece(null);
       },
@@ -486,7 +525,14 @@ export default function GameScreen({ mode, adventureLevel = 1, onHome, onNextLev
           grid={grid}
           onPiecePress={handlePieceSelect}
           selectedIndex={selectedPiece}
+          getPanHandlers={panResponder}
+          draggingIndex={isDragging ? selectedPiece : null}
         />
+
+        {/* Floating piece while dragging */}
+        {isDragging && selectedPiece !== null && dragPos && !pieces[selectedPiece]?.placed && (
+          <FloatingPiece piece={pieces[selectedPiece]} x={dragPos.x} y={dragPos.y} />
+        )}
 
         {/* Toasts */}
         {toasts.map(t => (

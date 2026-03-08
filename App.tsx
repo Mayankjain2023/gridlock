@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import {
   useFonts,
@@ -54,6 +55,7 @@ export default function App() {
   };
 
   return (
+    <SafeAreaProvider>
     <View style={styles.root} onLayout={onLayoutRootView}>
       <StatusBar style="dark" backgroundColor={COLORS.bg} />
 
@@ -74,6 +76,7 @@ export default function App() {
         />
       )}
     </View>
+    </SafeAreaProvider>
   );
 }
 

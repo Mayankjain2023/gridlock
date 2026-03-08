@@ -7,6 +7,7 @@ import {
   Dimensions,
   StatusBar,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS } from '../game/constants';
 
 const { width } = Dimensions.get('window');
@@ -18,7 +19,7 @@ type Props = {
 
 export default function ModeSelectScreen({ onClassic, onAdventure }: Props) {
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.bg} />
       <Text style={styles.title}>
         GRID<Text style={styles.titleAccent}>LOCK</Text>
@@ -50,7 +51,7 @@ export default function ModeSelectScreen({ onClassic, onAdventure }: Props) {
           </Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 

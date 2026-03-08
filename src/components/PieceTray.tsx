@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
-import { Piece, GRID_SIZE } from '../game/constants';
+import { View, StyleSheet } from 'react-native';
+import { Piece } from '../game/constants';
 import { fitAnywhere } from '../game/logic';
 import { GridType } from '../game/constants';
 
@@ -12,6 +12,8 @@ type Props = {
   grid: GridType;
   onPiecePress: (index: number) => void;
   selectedIndex: number | null;
+  getPanHandlers?: (idx: number) => { panHandlers: object };
+  draggingIndex?: number | null;
 };
 
 function PieceMini({ piece }: { piece: Piece }) {
@@ -43,7 +45,7 @@ function PieceMini({ piece }: { piece: Piece }) {
   );
 }
 
-export default function PieceTray({ pieces, grid, onPiecePress, selectedIndex }: Props) {
+export default function PieceTray({ pieces, grid, onPiecePress, selectedIndex, getPanHandlers, draggingIndex }: Props) {
   return (
     <View style={styles.tray}>
       {pieces.map((piece, i) => {
@@ -52,21 +54,24 @@ export default function PieceTray({ pieces, grid, onPiecePress, selectedIndex }:
         }
 
         const canFit = fitAnywhere(grid, piece.shape);
+        const isSelected = selectedIndex === i;
+        const isDragging = draggingIndex === i;
+        const panHandlers = getPanHandlers ? getPanHandlers(i).panHandlers : {};
 
         return (
-          <TouchableOpacity
+          <View
             key={i}
             style={[
               styles.slot,
               !canFit && styles.slotDead,
-              selectedIndex === i && styles.slotSelected,
+              isSelected && styles.slotSelected,
+              { transform: [{ scale: isSelected ? 1.2 : 1 }], opacity: isDragging ? 0 : 1 },
             ]}
-            onPress={() => canFit && onPiecePress(i)}
-            activeOpacity={canFit ? 0.8 : 1}
-            disabled={!canFit}
+            {...panHandlers}
+            onTouchEnd={() => canFit && onPiecePress(i)}
           >
             <PieceMini piece={piece} />
-          </TouchableOpacity>
+          </View>
         );
       })}
     </View>
@@ -93,9 +98,12 @@ const styles = StyleSheet.create({
     minHeight: 44,
   },
   slotSelected: {
-    backgroundColor: 'rgba(245,166,35,0.15)',
-    borderWidth: 2,
-    borderColor: '#f5a623',
+    backgroundColor: 'rgba(245,166,35,0.2)',
+    shadowColor: '#f5a623',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 8,
+    elevation: 6,
   },
   slotDead: {
     opacity: 0.2,
