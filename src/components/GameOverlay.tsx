@@ -53,7 +53,7 @@ export default function GameOverlay({
             {buttons.map((btn, i) => (
               <TouchableOpacity
                 key={i}
-                style={[styles.btn, styles[`btn_${btn.style}` as keyof typeof styles]]}
+                style={[styles.btn, styles[`btn_${btn.style}` as keyof typeof styles] as any]}
                 onPress={btn.onPress}
                 activeOpacity={0.85}
               >

@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
-import * as Font from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
 import {
   useFonts,

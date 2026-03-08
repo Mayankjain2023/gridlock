@@ -486,13 +486,13 @@ export default function GameScreen({ mode, adventureLevel = 1, onHome, onNextLev
 
         {/* Toasts */}
         {toasts.map(t => (
-          <Text
+          <View
             key={t.id}
-            style={[styles.toast, { color: t.color, top: `${t.top}%` as any }]}
             pointerEvents="none"
+            style={[styles.toastWrap, { top: `${t.top}%` as any }]}
           >
-            {t.text}
-          </Text>
+            <Text style={[styles.toast, { color: t.color }]}>{t.text}</Text>
+          </View>
         ))}
 
         {/* Game Over Overlay */}
@@ -533,14 +533,16 @@ const styles = StyleSheet.create({
     shadowRadius: 0,
     elevation: 6,
   },
-  toast: {
+  toastWrap: {
     position: 'absolute',
     left: 0,
     right: 0,
+    zIndex: 400,
+    alignItems: 'center',
+  },
+  toast: {
     textAlign: 'center',
     fontFamily: 'LilitaOne',
     fontSize: 28,
-    pointerEvents: 'none',
-    zIndex: 400,
   },
 });
