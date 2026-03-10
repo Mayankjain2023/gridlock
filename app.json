@@ -32,7 +32,8 @@
       "permissions": [
         "VIBRATE"
       ],
-      "intentFilters": []
+      "intentFilters": [],
+      "targetSdkVersion": 35
     },
     "web": {
       "favicon": "./assets/favicon.png"
