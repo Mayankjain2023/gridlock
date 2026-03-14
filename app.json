@@ -28,19 +28,26 @@
         "backgroundColor": "#fdf6ec"
       },
       "package": "com.veltrixgames.gridlock",
-      "versionCode": 2,
+      "versionCode": 3,
       "permissions": [
         "VIBRATE"
       ],
-      "intentFilters": [],
-      "targetSdkVersion": 35
+      "intentFilters": []
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-font",
-      "./withAdMob"
+      "./withAdMob",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "targetSdkVersion": 35
+          }
+        }
+      ]
     ],
     "scheme": "gridlock",
     "extra": {
